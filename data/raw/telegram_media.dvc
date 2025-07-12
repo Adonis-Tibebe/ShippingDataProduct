@@ -1,0 +1,6 @@
+outs:
+- md5: dbef561d65ef515868b2eecfc74f727b.dir
+  size: 29296034
+  nfiles: 319
+  hash: md5
+  path: telegram_media
