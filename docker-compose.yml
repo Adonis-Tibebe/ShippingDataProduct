@@ -30,6 +30,18 @@ services:
       - "5431:5432"  # Local access for pgAdmin or DBeaver
     networks:
       - data_net
+  telegram_scraper:
+    build: .
+    container_name: telegram_scraper
+    working_dir: /app/src/services
+    command: ["python", "telegram_scrapper.py"]
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./data:/app/data
+    env_file: .env
+    networks:
+      - data_net
 
 volumes:
   pgdata:
