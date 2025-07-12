@@ -156,6 +156,8 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/**/*.dvc
+!data/.dvc
 
 # Logs
 logs/
