@@ -1,0 +1,147 @@
+version: 2
+
+models:
+  - name: dim_channel
+    description: "Aggregated channel-level metrics from Telegram message activity"
+    columns:
+      - name: channel_id
+        description: "Surrogate key for each channel"
+        tests:
+          - not_null
+          - unique
+
+      - name: channel_name
+        description: "Telegram channel name"
+        tests:
+          - not_null
+          - unique
+          
+      - name: total_messages
+        description: "Number of messages posted by the channel"
+        tests:
+          - not_null
+
+      - name: total_views
+        description: "Sum of message views across all posts"
+        tests:
+          - not_null
+
+      - name: messages_with_media
+        description: "Count of posts containing media"
+        tests:
+          - not_null
+
+      - name: messages_without_media
+        description: "Count of posts without media"
+        tests:
+          - not_null
+
+      - name: health_related_messages
+        description: "Number of posts flagged as health-related"
+        tests:
+          - not_null
+  - name: dim_date
+    description: "Dynamic calendar dimension based on message posting dates"
+
+    columns:
+      - name: date
+        description: "Calendar date (primary key)"
+        tests:
+          - not_null
+          - unique
+
+      - name: year
+        description: "4-digit year of the date"
+      - name: month
+        description: "Month number (1–12)"
+      - name: day
+        description: "Day of month"
+      - name: day_name
+        description: "Full name of the weekday"
+      - name: day_of_week
+        description: "ISO weekday number (1 = Monday)"
+      - name: month_name
+        description: "Full name of the month"
+      - name: year_month
+        description: "YYYY-MM format for grouping"
+      - name: quarter
+        description: "Calendar quarter (1–4)"
+      - name: is_weekend
+        description: "TRUE if Saturday or Sunday"
+
+  - name: dim_message_metadata
+    description: "Message-level descriptors with surrogate keys for semantic joins"
+
+    columns:
+      - name: message_metadata_id (surrogate primary key)
+        description: "Surrogate key for each unique message across all channels"
+        #tests:
+          #- not_null
+          #- unique
+
+      - name: channel_name
+        description: "Name of the Telegram channel the message belongs to"
+        tests:
+          - not_null
+
+      - name: message_id
+        description: "Message ID (unique within its channel)"
+        tests:
+          - not_null
+
+      - name: message_text
+        description: "Raw text content extracted from the Telegram message"
+
+      - name: message_length
+        description: "Length of the message text in characters"
+
+      - name: product_names
+        description: "Pipe-delimited string of extracted product names from the message"
+
+      - name: is_health_related
+        description: "Boolean flag indicating whether the message is health-related"
+
+      - name: view_count
+        description: "Telegram-reported number of views for the message"
+
+      - name: has_media
+        description: "TRUE if message contains media; FALSE otherwise"
+        
+  - name: dim_products_mentioned
+    description: "Exploded product mentions linked to message metadata"
+
+    columns:
+      - name: message_metadata_id
+        description: "Foreign key to the message that mentions the product"
+        tests:
+          - not_null
+
+      - name: product_name
+        description: "Cleaned and lowercased name of mentioned product"
+        tests:
+          - not_null
+
+      - name: main_price
+        description: "Primary price associated with the message mentioning this product"
+  - name: fct_messages
+    description: "Fact table linking each message to channel and posting date dimensions, with scrape timestamp"
+
+    columns:
+      - name: message_metadata_id
+        description: "Foreign key to enriched message metadata (text, flags, etc)"
+        tests:
+          - not_null
+          - unique
+
+      - name: channel_id
+        description: "Foreign key to channel dimension"
+        tests:
+          - not_null
+
+      - name: posted_date
+        description: "Date the message was posted (joined from dim_date)"
+        tests:
+          - not_null
+
+      - name: scraped_date
+        description: "Timestamp when the message was scraped from Telegram (from staging)"
