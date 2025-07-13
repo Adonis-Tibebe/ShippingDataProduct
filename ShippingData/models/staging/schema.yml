@@ -1,0 +1,39 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: telegram_messages
+      - name: telegram_enriched
+
+models:
+  - name: stg_telegram_messages
+    description: "Staging model for enriched Telegram messages with views and media flags, produch names, prices etc... per message"
+    columns:
+      - name: channel_name
+        tests:
+          - not_null
+      - name: message_id
+        tests:
+          - not_null
+      - name: posted_at
+        tests:
+          - not_null
+      - name: message_text
+        tests:
+          - not_null
+      - name: message_length
+        description: "Character length of the Telegram message"
+      - name: product_names
+        description: "Extracted product names (pipe-delimited string)"
+      - name: main_price
+        description: "First extracted price from message text"
+      - name: is_health_related
+        description: "True if message contains health-related keywords"
+      - name: view_count
+        description: "Telegram-reported view count of the message"
+      - name: has_media
+        description: "True if raw_data includes any media object"
+        tests:
+          - not_null
