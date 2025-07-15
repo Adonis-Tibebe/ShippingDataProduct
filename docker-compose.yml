@@ -3,18 +3,24 @@ version: '3.8'
 services:
   app:
     build: .
-    container_name: shipping_data_app
+    container_name: analytics_api
     env_file: .env
+    environment:
+      DB_HOST: db       
+      DB_PORT: 5432 
+    working_dir: /app/analytics_api
     volumes:
-      - ./src:/app/src
-      - ./scripts:/app/scripts
+      - ./analytics_api:/app/analytics_api
       - ./config:/app/config
     depends_on:
       - db
     networks:
       - data_net
     ports:
-      - "8000:8000"  # Reserved for FastAPI later
+      - "8000:8000"  
+    command: >
+      uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
 
   db:
     image: postgres:15
@@ -48,3 +54,4 @@ volumes:
 
 networks:
   data_net:
+
