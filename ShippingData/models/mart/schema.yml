@@ -40,7 +40,7 @@ models:
         description: "Number of posts flagged as health-related"
         tests:
           - not_null
-  - name: dim_date
+  - name: dim_dates
     description: "Dynamic calendar dimension based on message posting dates"
 
     columns:
@@ -107,7 +107,7 @@ models:
       - name: has_media
         description: "TRUE if message contains media; FALSE otherwise"
         
-  - name: dim_products_mentioned
+  - name: dim_product_mention
     description: "Exploded product mentions linked to message metadata"
 
     columns:
@@ -145,3 +145,40 @@ models:
 
       - name: scraped_date
         description: "Timestamp when the message was scraped from Telegram (from staging)"
+  - name: fct_media
+    description: "Fact table for object detections extracted from Telegram media, enriched with dimensional metadata."
+    columns:
+      - name: media_detection_id
+        description: "Surrogate key for each individual detection"
+        tests:
+          - unique
+          - not_null
+
+      - name: message_id
+        description: "Original Telegram message ID (used for lineage or traceability)"
+        tests:
+          - not_null
+
+      - name: message_metadata_id
+        description: "Foreign key to message metadata dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_message_metadata')
+              field: message_metadata_id
+
+      - name: channel_id
+        description: "Foreign key to channel dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_channel')
+              field: channel_id
+
+      - name: label
+        description: "Detected object label from YOLOv8 inference"
+        tests:
+          - not_null
+
+      - name: confidence
+        description: "Detection confidence score from the model"
