@@ -1,0 +1,15 @@
+version: 2
+
+macros:
+  - name: generate_schema_name
+    description: >
+      Overrides the default schema naming behavior in dbt.
+      Returns the `custom_schema_name` if provided; otherwise, falls back to the default target schema.
+      Commonly used to organize models into separate schemas dynamically at runtime.
+    arguments:
+      - name: custom_schema_name
+        description: >
+          Optional schema name to override the default. If this is `none`, the macro will return `target.schema`.
+      - name: node
+        description: >
+          The model node object passed by dbt, containing metadata about the model or resource being processed.

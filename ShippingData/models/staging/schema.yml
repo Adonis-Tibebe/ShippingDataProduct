@@ -6,6 +6,7 @@ sources:
     tables:
       - name: telegram_messages
       - name: telegram_enriched
+      - name: media_detections 
 
 models:
   - name: stg_telegram_messages
@@ -37,3 +38,23 @@ models:
         description: "True if raw_data includes any media object"
         tests:
           - not_null
+
+  - name: stg_media_detections    
+    description: "Staging model for object detections extracted from Telegram media assets using yolov8"
+    columns:
+      - name: detection_id
+        description: "Surrogate key for each detection record"
+        tests: [unique, not_null]
+      - name: message_id
+        description: "Foreign key reference to Telegram message"
+        tests: [not_null]
+      - name: channel_name
+        description: "Telegram channel the media was sourced from"
+        tests: [not_null]
+      - name: image_path
+        description: "File path of the image that was processed"
+      - name: label
+        description: "Detected object label"
+        tests: [not_null]
+      - name: confidence
+        description: "Confidence score of the detection"

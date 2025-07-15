@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: top_3_products_per_channel
+  - name: top3_most_mentioned_products_per_channel
     description: "An example aggregated table showing the top 3 most mentioned products in each Telegram channel"
     columns:
       - name: product_name
@@ -15,3 +15,98 @@ models:
         description: "Number of times the product was mentioned in that channel"
       - name: rank
         description: "Ranking of the product within the channel based on mentions"
+
+  - name: top_products
+    description: "Top medical product mentions grouped by channel, ordered by frequency. Used in public reporting and API response."
+    columns:
+      - name: product_name
+        description: "Name of the mentioned product or drug"
+        tests:
+          - not_null
+
+      - name: channel_name
+        description: "Name of the Telegram channel where the product was mentioned"
+        tests:
+          - not_null
+
+      - name: mention_count
+        description: "Number of times the product was mentioned in messages from the channel"
+        tests:
+          - not_null
+
+  - name: product_price_per_channel
+    description: "Aggregated product pricing and mention counts by channel, used for price tracking and availability analysis"
+    columns:
+      - name: product_name
+        description: "Name of the mentioned product or drug"
+        tests: [not_null]
+
+      - name: channel_name
+        description: "Name of the Telegram channel"
+        tests: [not_null]
+
+      - name: mention_count
+        description: "Number of times the product was mentioned in the channel"
+        tests: [not_null]
+
+      - name: min_price
+        description: "Lowest price mentioned for the product in the channel"
+
+      - name: max_price
+        description: "Highest price mentioned for the product in the channel"
+
+      - name: avg_price
+        description: "Average mentioned price for the product in the channel"
+  
+  - name: media_coverage_by_channel
+    description: "Channel-level breakdown of visual content presence, based on object detections in media-bearing messages"
+    columns:
+      - name: channel_name
+        description: "Name of the Telegram channel"
+        tests: [not_null]
+
+      - name: channel_id
+        description: "Surrogate ID for the channel"
+        tests: [not_null, unique]
+
+      - name: total_messages
+        description: "Total messages posted in the channel"
+        tests: [not_null]
+      - name: media_without_detection_count
+        description: "Number of detection entries where no object was detected in media"
+        tests: [not_null]
+
+      - name: messages_with_detections
+        description: "Messages containing at least one detected object"
+        tests: [not_null]
+
+      - name: detection_rate
+        description: "Ratio of messages with object detections vs. total messages"
+  
+  - name: health_related_topic_trend
+    description: "Temporal trends in health-related message volume, tracked daily and weekly using calendar dimensions"
+    columns:
+      - name: date
+        description: "Date of the message activity"
+        tests: [not_null]
+
+      - name: day_name
+        description: "Day name (e.g. Monday)"
+
+      - name: day_of_week
+        description: "Numeric day-of-week (ISO standard)"
+
+      - name: year_month
+        description: "Year–Month string (e.g. 2024-06)"
+
+      - name: is_weekend
+        description: "Flag if the date is a Saturday or Sunday"
+
+      - name: health_related_posts
+        description: "Number of messages flagged as health-related"
+
+      - name: total_posts
+        description: "Total number of messages posted on the date"
+
+      - name: health_focus_ratio
+        description: "Ratio of health-related to total posts on that date"

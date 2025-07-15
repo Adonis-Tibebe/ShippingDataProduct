@@ -1,0 +1,5 @@
+outs:
+- md5: 0d99a9aad86d054829b3d606ccd9eb49
+  size: 98853
+  hash: md5
+  path: media_detection_results.json
