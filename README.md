@@ -1,102 +1,160 @@
 # ShippingDataProduct
 
-ShippingDataProduct is a data pipeline for scraping, extracting, and storing messages and media from selected Telegram channels related to pharmaceuticals and cosmetics. The project is designed for data collection, analysis, and future integration with data science or backend services.
+ShippingDataProduct is a robust data pipeline and analytics platform for scraping, extracting, enriching, and analyzing messages and media from Telegram channels related to pharmaceuticals and cosmetics.
+
+---
 
 ## Features
-- Scrapes messages and media (images) from specified Telegram channels using Telethon.
-- Saves messages as structured JSON files and media as images, organized by date and channel.
-- Utilities for extracting product names, prices, and health-related flags from messages.
+
+- Scrapes messages and media (images) from Telegram channels using Telethon.
+- Extracts product names, prices, and health-related flags from messages.
+- Runs YOLOv8 object detection on media and integrates results into analytics.
+- Orchestrates the full ETL and analytics pipeline with Dagster.
+- Serves analytics via a FastAPI API.
 - Data versioning and management with DVC.
+- Automated testing and CI with GitHub Actions.
 - Ready for containerized deployment with Docker and Docker Compose.
 
+---
+
 ## Directory Structure
-- `src/services/telegram_scrapper.py` — Main script for scraping Telegram messages and media.
-- `src/utils/Extractors.py` — Utilities for extracting structured data (products, prices, etc.) from messages.
-- `data/raw/telegram_messages/` — Scraped messages in JSON format, organized by date and channel.
-- `data/raw/telegram_media/` — Downloaded media files (images) from Telegram channels.
-- `config/` — Configuration and credential loading scripts.
-- `requirements.txt` — Python dependencies.
-- `docker-compose.yml` — Multi-service orchestration (scraper, database, and a placeholder for a future app backend).
-- `scripts/` — ETL and database utility scripts for loading, enriching, and managing data in PostgreSQL.
-- `ShippingData/` — dbt analytics project for transforming and modeling Telegram data for analysis.
+
+- `src/services/telegram_scrapper.py` — Telegram scraping logic.
+- `src/utils/Extractors.py` — Data extraction utilities.
+- `data/` — Raw and processed data, tracked with DVC.
+- `notebooks/` — Jupyter notebooks for prototyping and analysis.
+- `config/` — Configuration and credential loading.
+- `scripts/` — ETL and database utility scripts.
+- `ShippingData/` — dbt analytics project for transforming and modeling data.
+- `analytics_api/` — FastAPI app for serving analytics endpoints.
+- `dagster_pipeline/` — Dagster orchestration project for the full pipeline.
+- `Makefile` — Common developer commands.
+- `pyproject.toml` — Project metadata and formatting tools.
+
+---
+
+## Orchestration & Automation (`dagster_pipeline/`)
+
+- **Purpose:** Automates the full ETL and analytics workflow using Dagster.
+- **How to run:**  
+  ```bash
+  make run-dagster
+  # or
+  dagster dev -f dagster_pipeline/repository.py
+  ```
+- **Features:** Visual pipeline, scheduling, observability, and error handling.
+
+---
+
+## Analytics API (`analytics_api/`)
+
+- **Purpose:** Serves analytics endpoints for querying product mentions, pricing, media coverage, and more.
+- **How to run:**  
+  ```bash
+  make run-api
+  # or
+  uvicorn analytics_api.main:app --reload
+  ```
+- **Endpoints:** See `analytics_api/README.md` for full API documentation.
 
 ---
 
 ## ETL & Database Scripts (`scripts/`)
-This directory contains essential scripts for managing the ETL pipeline and database:
-- **create_tables.py**: Creates the necessary PostgreSQL schema and tables for raw Telegram messages and media.
-- **load_messages.py**: Loads scraped Telegram messages from JSON files into the database.
-- **load_media_index.py**: Loads media metadata (from the media index JSON) into the database.
-- **enrich_telegram_messages.py**: Enriches raw messages in the database by extracting product names, prices, and health-related flags, and stores the results in a new table.
 
-Run these scripts in order to set up and populate your database with both raw and enriched data.
+- **Purpose:** Scripts for loading, enriching, and managing data in PostgreSQL.
+- **How to use:** See `scripts/README.md` for details and usage order.
 
 ---
 
 ## Analytics & Modeling (`ShippingData/`)
-This directory is a full-featured **dbt analytics project** for transforming and modeling the Telegram data:
-- **Purpose**: Turns raw scraped and loaded data into analytics-ready tables and insights.
-- **Structure**: Includes staging, dimension, mart, and analysis models, as well as tests and macros.
-- **Usage**: See `ShippingData/README.md` for full details. Typical workflow:
+
+- **Purpose:** dbt project for transforming raw and enriched data into analytics-ready tables.
+- **How to use:**  
   ```bash
+  make dbt-build
+  # or
   cd ShippingData
-  dbt run            # Build all models
-  dbt test           # Validate models
-  dbt docs generate  # Generate documentation
-  dbt docs serve     # Preview docs locally
+  dbt run
+  dbt test
+  dbt docs serve
   ```
-- **Testing**: Includes both standard and custom data tests for data quality and business rules.
+- **Details:** See `ShippingData/README.md` for model and analytics documentation.
 
 ---
 
-## Installation
+## Data & Notebooks
 
-```bash
-pip install -r requirements.txt
-```
+- **`data/`**: Raw and processed data, tracked with DVC. See `data/README.md`.
+- **`notebooks/`**: Jupyter notebooks for prototyping and analysis. See `notebooks/README.md`.
 
-Or, using Docker Compose (recommended for full pipeline):
+---
 
-```bash
-docker-compose up --build
-```
+## Testing & CI
 
-## Setup
-1. **Telegram API Credentials:**
-   - Create a `.env` file in the project root with the following variables:
-     ```env
-     TG_API_ID=your_telegram_api_id
-     TG_API_HASH=your_telegram_api_hash
-     phone=your_telegram_phone_number
-     POSTGRES_USER=your_db_user
-     POSTGRES_PASSWORD=your_db_password
-     POSTGRES_DB=your_db_name
-     DB_HOST=db
-     DB_PORT=5432
-     ```
-2. **Initialize Telegram Session:**
-   - Run the session initializer to authenticate your Telegram account:
-     ```bash
-     python src/services/initialize_session.py
-     ```
-
-## Usage
-- **Run the Scraper:**
+- **Unit tests:**  
   ```bash
-  python src/services/telegram_scrapper.py
+  make test
+  # or
+  pytest tests
   ```
-  This will scrape messages and media from the configured channels and save them in `data/raw/telegram_messages/` and `data/raw/telegram_media/`.
+- **CI:** Automated with GitHub Actions on Windows (see `.github/workflows/ci.yml`).
 
-- **Data Output:**
-  - Messages: `data/raw/telegram_messages/<YYYY-MM-DD>/<channel>.json`
-  - Media: `data/raw/telegram_media/`
-  - Media index: `data/raw/media_index_<YYYY-MM-DD>.json`
+---
 
-- **Data Extraction Utilities:**
-  Use functions in `src/utils/Extractors.py` to extract product names, prices, and health flags from the scraped messages.
+## Makefile & pyproject.toml
+
+- **Makefile:** Common commands for setup, testing, running services, and cleaning.
+- **pyproject.toml:** Project metadata and formatting tool configs.
+
+---
+
+## Installation & Setup
+
+1. **Install dependencies:**  
+   ```bash
+   make setup
+   ```
+2. **Configure `.env` file** with Telegram and database credentials.
+3. **Initialize Telegram session:**  
+   ```bash
+   python src/services/initialize_session.py
+   ```
+4. **Run the pipeline and analytics API as needed.**
+
+---
+
+## Docker & Docker Compose
+
+- **Purpose:** Easily run the full stack (API, database, scraper) in isolated containers.
+- **Services:**
+  - `analytics_api`: FastAPI analytics service (port 8000)
+  - `db`: PostgreSQL database (port 5431 on host, 5432 in container)
+  - `telegram_scraper`: Telegram scraping service
+- **How to build and run:**
+  ```bash
+  docker-compose up --build
+  ```
+- **Volumes:**
+  - Database data is persisted in a Docker volume (`pgdata`).
+  - Source code and data directories are mounted for live development and data sharing.
+- **Environment:**
+  - All services use the `.env` file at the project root for credentials and configuration.
+- **Stopping and cleaning up:**
+  ```bash
+  docker-compose down
+  # To remove volumes:
+  docker-compose down -v
+  ```
+- **Notes:**
+  - Use the docker_requirements.txt to install dependencies.
+  - The API and scraper containers mount your local code for easy development.
+  - The database is accessible on port 5431 for local tools (e.g., pgAdmin, DBeaver).
+
+---
 
 ## Data Versioning
-- DVC is used to track and version data files. To push/pull data, use:
+
+- DVC is used to track and version data files.  
   ```bash
   dvc add data/raw/telegram_messages
   dvc add data/raw/telegram_media
@@ -104,21 +162,14 @@ docker-compose up --build
   dvc pull
   ```
 
-## Extending the Project
-- The project is ready for further development, such as:
-  - **FastAPI backend:** The `docker-compose.yml` reserves port 8000 for a future FastAPI (or similar) backend, but this is currently just a placeholder and not implemented yet.
-  - Integrating with PostgreSQL for structured data storage.
-  - Building data analysis or visualization notebooks in `notebooks/`.
-
-## Dependencies
-See `requirements.txt` for the full list. Key packages:
-- Telethon
-- python-dotenv
-- DVC
-- Docker, Docker Compose
-- dbt (for analytics in ShippingData/)
+---
 
 ## License
- None 
+
+_None_
+
 ---
-For more details, see the code in `src/services/telegram_scrapper.py`, `src/utils/Extractors.py`, the `scripts/` directory, and the `ShippingData/` dbt project. For questions, open an issue or contact the maintainer.
+
+## For More Details
+
+See the code in each directory, the subdirectory READMEs, and the dbt and Dagster documentation. For questions, open an issue or contact the maintainer.
