@@ -136,5 +136,9 @@ async def main():
     await scrape_media()
     logger.info("✅ All scraping tasks completed.")
 
-with client.start(phone=phone) as session:
-    session.loop.run_until_complete(main())
+def run_scraper():
+    with client.start(phone=phone) as session:
+        session.loop.run_until_complete(main())
+
+if __name__ == "__main__":
+    run_scraper()
