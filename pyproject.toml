@@ -1,12 +1,21 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "your-project-name"
+name = "shipping-data-product"
 version = "0.1.0"
-description = ""
-requires-python = ">=3.8"
+description = "Telegram health data analytics pipeline with ETL, YOLO, dbt, and FastAPI."
+authors = [
+    { name = "Adoniyas Tibebe", email = "adatibebe12@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+# Note: Full dependencies are managed in requirements.txt
